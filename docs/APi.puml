@@ -1,0 +1,64 @@
+@startuml API
+
+class Expense {
+ - amount : Decimal
+ - date : Date 
+ - description : String
+ - category : category
+}
+
+class ExpenseCategory {
+ - Name : String
+}
+
+class Income {
+ - amount : Decimal
+ - date : Date 
+ - source : String
+}
+
+interface BaseManager {
+  + itemList : [T]
+  + Create()
+  + Read()
+  + Update()
+  + Delete()
+}
+
+class ExpensesManager {
+  + itemList : [Expense]
+  + Create()
+  + Read()
+  + Update()
+  + Delete()
+}
+
+class IncomeManager {
+  + itemList : [Income]
+  + Create()
+  + Read()
+  + Update()
+  + Delete()
+}
+
+class ExpenseCategoryManager {
+  + itemList : [ExpenseCategory]
+  + PredefineCategories()
+  + CreateCategory()
+}
+
+class MonthlyBudgeting {
+  + MonthlyBudgeting : Decimal
+  + exceedingAlert()
+}
+
+
+ExpenseCategoryManager --> ExpensesManager : has a
+ExpensesManager --> MonthlyBudgeting : track
+ExpensesManager --> BaseManager  : Implement
+IncomeManagerManager --> BaseManager  : Implement
+Expense --> ExpensesManager : use
+Income --> IncomeManager  : use
+ExpenseCategory --> Expense : has a
+
+@enduml
