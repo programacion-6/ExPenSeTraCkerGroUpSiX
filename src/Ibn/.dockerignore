@@ -1,0 +1,35 @@
+# Exclude the following files and directories
+
+# Exclude .git directory
+.git
+
+# Exclude build and dependency directories
+bin/
+obj/
+
+# Exclude configuration files that are specific to the development environment
+appsettings.Development.json
+appsettings.json
+*.UserSecrets
+
+# Exclude Visual Studio files
+.vs/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# Exclude NuGet packages directory
+.nuget/
+
+# Exclude Docker-related files
+Dockerfile
+docker-compose.yml
+
+# Exclude temporary files and logs
+*.log
+*.tmp
+
+# Exclude IDE and editor specific files
+*.idea/
+*.vscode/
