@@ -1,0 +1,6 @@
+@Ibn_HostAddress = http://localhost:5108
+
+GET {{Ibn_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
