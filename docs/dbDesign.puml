@@ -4,14 +4,12 @@
     - Id : int
     - Name : string
     - Email: string
-    - ActualExpense: decimal
-    - GoalExpense: decimal
     - PasswordHash: string
     - CreatedAt: date
     }
   
     
-    entity ExpenseTracker {
+    entity Expense {
     - Id : int
     - UserId : int
     - Amount: decimal
@@ -21,7 +19,7 @@
     - CreatedAt: date
     }
     
-    entity IncomeTracker {
+    entity Income {
     - Id : int
     - UserId : int
     - Amount: decimal
@@ -33,14 +31,6 @@
     entity ExpenseCategory {
     - Id : int
     - Name: string
-    }
-
-    entity UserGoals {
-    - UserId : int
-    - ExpectBudgeting: int
-    - ActualBudgeting: int
-    - ExpectIncomeGoal: int
-    - ActualIncomeGoal: int
     }
     
     entity Budgdet {
@@ -60,10 +50,9 @@
     }
  
  
-User }o-- ExpenseTracker
-User }o-- IncomeTracker 
-User }o-- UserGoals 
-ExpenseTracker }o-- ExpenseCategory 
+User }o-- Expense
+User }o-- Income 
+Expense }o-- ExpenseCategory 
 User ||-- Budgdet : has a
 User }o-- Goal 
 
