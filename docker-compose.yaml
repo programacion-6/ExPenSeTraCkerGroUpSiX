@@ -1,0 +1,38 @@
+name: Ibn
+
+services:
+  # asp.net web application
+  webapp:
+    container_name: api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports: 
+      - "5008:5008"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - Database__ConnectionString__DefaultConnection=Host=db;Port=5432;Database=helios;Username=phaeton;Password=ecliptic
+    depends_on:
+      db:
+        condition: service_healthy
+
+  # posgreSQL database
+  db:
+    container_name: helios-db
+    image: postgres:12.20-alpine3.20
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_DB: helios
+      POSTGRES_USER: phaeton
+      POSTGRES_PASSWORD: ecliptic
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U phaeton -d helios"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
