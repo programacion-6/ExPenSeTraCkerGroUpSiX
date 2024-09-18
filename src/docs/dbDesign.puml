@@ -16,9 +16,9 @@
     - UserId : int
     - Amount: decimal
     - Description: string
-    - Category: string
+    - ExpenseCategoryId: int
     - Date : date
-    - CreatednAt: date
+    - CreatedAt: date
     }
     
     entity IncomeTracker {
@@ -28,6 +28,19 @@
     - Source: string
     - Date : date
     - CreatedAt: date
+    }
+
+    entity ExpenseCategory {
+    - Id : int
+    - Name: string
+    }
+
+    entity UserGoals {
+    - UserId : int
+    - ExpectBudgeting: int
+    - ActualBudgeting: int
+    - ExpectIncomeGoal: int
+    - ActualIncomeGoal: int
     }
     
     entity Budgdet {
@@ -49,6 +62,8 @@
  
 User }o-- ExpenseTracker
 User }o-- IncomeTracker 
+User }o-- UserGoals 
+ExpenseTracker }o-- ExpenseCategory 
 User ||-- Budgdet : has a
 User }o-- Goal 
 
