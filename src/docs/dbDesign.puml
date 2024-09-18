@@ -1,0 +1,60 @@
+@startuml title Data base design
+
+    entity User {
+    - Id : int
+    - Name : string
+    - Email: string
+    - PasswordHash: string
+    - CreatedAt: date
+    }
+  
+    
+    entity Expense {
+    - Id : int
+    - UserId : int
+    - Amount: decimal
+    - Description: string
+    - ExpenseCategoryId: int
+    - Date : date
+    - CreatedAt: date
+    }
+    
+    entity Income {
+    - Id : int
+    - UserId : int
+    - Amount: decimal
+    - Source: string
+    - Date : date
+    - CreatedAt: date
+    }
+
+    entity ExpenseCategory {
+    - Id : int
+    - Name: string
+    }
+    
+    entity Budget {
+    - Id : int
+    - UserId : int
+    - Month: date
+    - BudgetAmount: decimal
+    }
+    
+    entity Goal {
+    - Id : int
+    - UserId : int
+    - GoalAmount: decimal
+    - DeadLine: date
+    - CurrentAmount : decimal
+    - CreatedAt: date
+    }
+ 
+ 
+User }o-- Expense
+User }o-- Income 
+Expense }o-- ExpenseCategory 
+User ||-- Budgdet : has a
+User }o-- Goal 
+
+
+@enduml
