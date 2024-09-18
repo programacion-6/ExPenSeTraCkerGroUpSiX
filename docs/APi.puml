@@ -1,64 +1,200 @@
-@startuml API
+@startuml ExpenseTracker
 
-class Expense {
- - amount : Decimal
- - date : Date 
- - description : String
- - category : category
+package "API" {
+  class Expense {
+   - id : Guid
+   - amount : Decimal
+   - date : Date 
+   - description : String
+   - category : ExpenseCategory
+  }
+  
+  class ExpenseCategory {
+   - id : Guid
+   - Name : String
+  }
+  
+  class Income {
+   - id : Guid
+   - amount : Decimal
+   - date : Date 
+   - source : String
+  }
+  
+  class UserItems {
+    + UserId : Guid
+    + Expenses : [Expense]
+    + Incomes : [Income] 
+    + ExpensesCategory : [ExpensesCategory]
+  }
+  
+  class UserGoals {
+    + UserId : Guid 
+    + ExpectBudgeting : Decimal
+    + ActualBudgeting : Decimal
+    + ExpectIncomeGoal : Decimal
+    + ActualIncomeGoal : Decimal
+  }
+  
+  interface BaseService {
+    + Context : ApplicationDbContext
+    + Create(T) : bool
+    + Read() : [T]
+    + Update(Guid, T) : bool
+    + Delete(Guid) : bool
+  }
+  
+  class ExpensesService {
+    + Context : ApplicationDbContext
+    + Create(Expense) : bool
+    + Read() : [Expense]
+    + Update(Guid, Expense) : bool
+    + Delete(Guid) : bool
+  }
+  
+  class IncomeService {
+    + Context : ApplicationDbContext
+    + Create(Income) : bool
+    + Read() : [Income]
+    + Update(Guid, Income) : bool
+    + Delete(Guid) : bool
+  }
+  
+  class ExpenseCategoryService {
+    + Context : ApplicationDbContext
+    + PredefineCategories() : Void 
+    + CreateCategory(String) : Bool
+    + ListCategories() : [ExpenseCategory]
+  }
+
+  
+  class MonthlyBudgeting {
+    + Context : ApplicationDbContext
+    + VerifyBudgetingStatus() : bool
+  }
+  
+  
+  ExpenseCategoryService --* ExpensesService : has a
+  ExpensesService --|> BaseService  : Implement
+  IncomeService --|> BaseService  : Implement
+  Expense --* ExpensesService : use
+  Income --* IncomeService  : use
+  ExpenseCategory --* Expense
+  Expense --o UserItems
+  ExpenseCategory --o UserItems
+  Income --o UserItems
+
 }
 
-class ExpenseCategory {
- - Name : String
+package "User" {
+  class User {
+    + Id : Guid
+    + Name : String 
+    + Email : String 
+    + Password : String 
+  }
+  
+  class UserManager {
+    + userList : [User]
+    + Create(User) : bool
+    + Read() : [User]
+    + Update(Guid, User) : bool
+    + Delete(Guid) : bool
+  }
+
+  class UserService { 
+  + RegisterUser(): IActionResult 
+  + LoginUser(): IActionResult 
+  + ResetPassword(): IActionResult 
+  + GetUserProfile(): User
+   }
+
+  
+  class PasswordService {
+    + EncriptarPassword(String): String
+    + VerificarPassword(String, String) : Bool
+  }
+
+  class EmailService{
+        +SendEmail():bool
+  }
+  class TokenService{
+     +CreateToken():String
+  }
+
+  UserManager --> User : manages 
+  UserService --> UserManager : uses 
+  UserService --> User : operates on
+  UserService --> PasswordService : uses
+  UserService --> TokenService : uses
+  UserService --> EmailService : uses
+  
 }
 
-class Income {
- - amount : Decimal
- - date : Date 
- - source : String
+package "Persistence" {
+  
+  class DbInitializer {
+    + Initialize(String) : Void
+  }
+  
+  class DbConstance {
+    + DefaultConnectionPath : String 
+  }
+  
+  class UserContext {
+    + UserId : Guid
+  }
+  
+  class ApplicationDbContext {
+    + UserItems :  DbSet<UserItems>
+    + UserGoals :  DbSet<UserGoals>
+    + Users : DbSet<User>
+  }
+  
 }
 
-interface BaseManager {
-  + itemList : [T]
-  + Create()
-  + Read()
-  + Update()
-  + Delete()
-}
-
-class ExpensesManager {
-  + itemList : [Expense]
-  + Create()
-  + Read()
-  + Update()
-  + Delete()
-}
-
-class IncomeManager {
-  + itemList : [Income]
-  + Create()
-  + Read()
-  + Update()
-  + Delete()
-}
-
-class ExpenseCategoryManager {
-  + itemList : [ExpenseCategory]
-  + PredefineCategories()
-  + CreateCategory()
-}
-
-class MonthlyBudgeting {
-  + MonthlyBudgeting : Decimal
-  + exceedingAlert()
+package "RequestPipeLine" {
+  class WebApplicationExtension {
+    + InitializeDatabase (WebApplication) : WebApplication
+  }
 }
 
 
-ExpenseCategoryManager --> ExpensesManager : has a
-ExpensesManager --> MonthlyBudgeting : track
-ExpensesManager --> BaseManager  : Implement
-IncomeManagerManager --> BaseManager  : Implement
-Expense --> ExpensesManager : use
-Income --> IncomeManager  : use
-ExpenseCategory --> Expense : has a
+package "Controllers" {
 
+  class UserContextMiddleWare() {
+    + InvokeAsync(HttpContext) : Task 
+  }
+
+  class ExpenseController {
+    + AddExpense(Decimal, String, String, Date) : IActionResult
+    + GetAllExpenses() : IActionResult
+    + GetExpense() : IActionResult
+    + UpdateExpense(Decimal, String, String, Date) : IActionResult
+    + DeleteExpense() : IActionResult
+  }
+  
+  class IncomeController {
+    + AddIncome(Decimal, String, Date) : IActionResult
+    + GetAllIncomes() : IActionResult
+    + GetIncome() : IActionResult
+    + UpdateIncome(Decimal, String, Date) : IActionResult
+    + DeleteIncome() : IActionResult
+  }
+  
+  class UserController {
+    + RegisterUser(String, String, String) : IActionResult
+    + Login(String, String) : IActionResult
+    + UpdateProfile(String, String, String) : IActionResult
+    + ResetPassword(String) : IActionResult
+  }
+  
+  class MonthlySummaryController {
+    + SetMonthlyBudget(Decimal, Date): IActionResult
+    + GetMonthlySummary(): IActionResult
+    + GetMonthlyBudgetStatus() : IActionResult
+    + SetSavingGoal(Decimal, Date): IActionResult
+    + GetSavingGoal(): IActionResult
+  }
+}
 @enduml
