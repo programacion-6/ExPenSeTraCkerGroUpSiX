@@ -33,7 +33,7 @@
     - Name: string
     }
     
-    entity Budgdet {
+    entity Budget {
     - Id : int
     - UserId : int
     - Month: date
