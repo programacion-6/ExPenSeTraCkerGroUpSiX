@@ -1,6 +1,17 @@
 @startuml ExpenseTracker
 
-package "API" {
+  Domain.UserItems --* Persistence.ApplicationDbContext
+  Domain.UserGoals --* Persistence.ApplicationDbContext
+  Persistence.DbInitializer --* RequestPipeLine.WebApplicationExtension
+  Domain.Expense --* API.ExpensesService : use
+  Domain.Income --* API.IncomeService  : use
+  User.UserManager --> Domain.User : manages 
+  User.UserService --> Domain.User : operates on
+  Mapper.CreateUserRequest --o Controllers.UserController
+  Mapper.CreateExpenseRequest --o Controllers.ExpenseController
+  Mapper.CreateIncomeRequest --o Controllers.IncomeController
+  
+package "Domain" {
   class Expense {
    - id : Guid
    - amount : Decimal
@@ -35,6 +46,53 @@ package "API" {
     + ExpectIncomeGoal : Decimal
     + ActualIncomeGoal : Decimal
   }
+  
+  class User {
+    + Id : Guid
+    + Name : String 
+    + Email : String 
+    + Password : String 
+  }
+  
+  
+  ExpenseCategory --* Expense
+  Expense --o UserItems
+  ExpenseCategory --o UserItems
+  Income --o UserItems
+}  
+  
+  
+package "Mapper" {
+
+  interface CreateRequestTemplate {
+    + ToDomain(): T 
+  }
+
+  class CreateExpenseRequest {
+   - amount : Decimal
+   - date : Date 
+   - description : String
+   - category : ExpenseCategory
+   + ToDomain(): Expense
+  } 
+  
+  class CreateIncomeRequest {
+   - amount : Decimal
+   - date : Date 
+   - source : String
+   + ToDomain(): Income
+  }
+  
+  class CreateUserRequest {
+    + Name : String 
+    + Email : String 
+    + Password : String 
+    + ToDomain(): User 
+  }
+  
+}
+
+package "API" {
   
   interface BaseService {
     + Context : ApplicationDbContext
@@ -77,22 +135,11 @@ package "API" {
   ExpenseCategoryService --* ExpensesService : has a
   ExpensesService --|> BaseService  : Implement
   IncomeService --|> BaseService  : Implement
-  Expense --* ExpensesService : use
-  Income --* IncomeService  : use
-  ExpenseCategory --* Expense
-  Expense --o UserItems
-  ExpenseCategory --o UserItems
-  Income --o UserItems
-
+  
 }
 
 package "User" {
-  class User {
-    + Id : Guid
-    + Name : String 
-    + Email : String 
-    + Password : String 
-  }
+  
   
   class UserManager {
     + userList : [User]
@@ -122,9 +169,8 @@ package "User" {
      +CreateToken():String
   }
 
-  UserManager --> User : manages 
+  
   UserService --> UserManager : uses 
-  UserService --> User : operates on
   UserService --> PasswordService : uses
   UserService --> TokenService : uses
   UserService --> EmailService : uses
@@ -137,7 +183,7 @@ package "Persistence" {
     + Initialize(String) : Void
   }
   
-  class DbConstance {
+  class DbConstants {
     + DefaultConnectionPath : String 
   }
   
@@ -167,25 +213,25 @@ package "Controllers" {
   }
 
   class ExpenseController {
-    + AddExpense(Decimal, String, String, Date) : IActionResult
+    + AddExpense(CreateExpenseRequest) : IActionResult
     + GetAllExpenses() : IActionResult
     + GetExpense() : IActionResult
-    + UpdateExpense(Decimal, String, String, Date) : IActionResult
+    + UpdateExpense(CreateExpenseRequest) : IActionResult
     + DeleteExpense() : IActionResult
   }
   
   class IncomeController {
-    + AddIncome(Decimal, String, Date) : IActionResult
+    + AddIncome(CreateIncomeRequest) : IActionResult
     + GetAllIncomes() : IActionResult
     + GetIncome() : IActionResult
-    + UpdateIncome(Decimal, String, Date) : IActionResult
+    + UpdateIncome(CreateIncomeRequest) : IActionResult
     + DeleteIncome() : IActionResult
   }
   
   class UserController {
-    + RegisterUser(String, String, String) : IActionResult
+    + RegisterUser(CreateUserRequest) : IActionResult
     + Login(String, String) : IActionResult
-    + UpdateProfile(String, String, String) : IActionResult
+    + UpdateProfile(CreateUserRequest) : IActionResult
     + ResetPassword(String) : IActionResult
   }
   
