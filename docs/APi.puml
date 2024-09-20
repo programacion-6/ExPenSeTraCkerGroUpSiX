@@ -90,6 +90,9 @@ package "Mapper" {
     + ToDomain(): User 
   }
   
+  CreateRequestTemplate --> CreateExpenseRequest : Implement
+  CreateRequestTemplate --> CreateIcomeRequest : Implement
+  CreateRequestTemplate --> CreateUserRequest : Implement
 }
 
 package "API" {
@@ -133,8 +136,8 @@ package "API" {
   
   
   ExpenseCategoryService --* ExpensesService : has a
-  ExpensesService --|> BaseService  : Implement
-  IncomeService --|> BaseService  : Implement
+  ExpensesService --> BaseService  : Implement
+  IncomeService --> BaseService  : Implement
   
 }
 
