@@ -1,4 +1,4 @@
-namespace ExpenseTrackerGrup6.src.Domain;
+namespace RestApi.Domain;
 
 public class User
 {
