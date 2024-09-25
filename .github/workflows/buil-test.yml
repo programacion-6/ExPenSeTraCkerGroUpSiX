@@ -1,14 +1,16 @@
-name: pull-request
+name: Develop pull request
+run-name: ${{ github.actor }} is testing ${{ github.ref }} 🚀
 
 on:
   pull_request:
     branches: [ develop ]
-    paths:
-    - '**.cs'
-    - '**.csproj'
+  workflow_dispatch:
 
 env:
   DOTNET_VERSION: '8.0' # The .NET SDK version to use
+
+permissions:
+  pull-requests: write
 
 jobs:
   build:
@@ -21,8 +23,6 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      working-directory: src/Ibn
     - name: Build
       run: |
         dotnet restore
@@ -30,6 +30,7 @@ jobs:
 
 
   test:
+    needs: build
     name: Test
     runs-on: ubuntu-latest
 
@@ -39,9 +40,25 @@ jobs:
       uses: actions/setup-dotnet@v3
       with:
         dotnet-version: ${{ env.DOTNET_VERSION }}
-
-      working-directory: src/Ibn
     - name: Test
       run: |
         dotnet restore
-        dotnet test --no-restore --verbosity normal
+        dotnet test --no-restore --verbosity normal --collect:"XPlat Code Coverage" --logger trx --results-directory coverage
+
+    - name: Code Coverage Summary Report
+      uses: irongut/CodeCoverageSummary@v1.3.0
+      with:
+        filename: 'coverage/*/coverage.cobertura.xml'
+        badge: true
+        format: 'markdown'
+        output: 'both'
+
+    - name: Add Coverage PR Comment
+      uses: marocchino/sticky-pull-request-comment@v2
+      with:
+        recreate: true
+        path: code-coverage-results.md
+
+    - name: Write to Job Summary
+      run: cat code-coverage-results.md >> $GITHUB_STEP_SUMMARY
+
