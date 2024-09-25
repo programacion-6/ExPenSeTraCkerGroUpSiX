@@ -2,6 +2,6 @@ namespace RestApi.Domain;
 
 public class ExpenseCategory
 {
-    public required Guid Id { get; set; }
+    public Guid Id { get; init; } = Guid.NewGuid();
     public required string Name { get; set; }
 }
