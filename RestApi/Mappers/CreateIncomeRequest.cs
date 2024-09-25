@@ -2,7 +2,7 @@ using RestApi.Domain;
 
 namespace RestApi.Mappers;
 
-public record CreateIncomeRequest
+public record CreateIncomeRequest: CreateRequestTemplate<Income>
 {
     public required decimal Amount { get; set; }
     public required DateTime Date { get; set; }

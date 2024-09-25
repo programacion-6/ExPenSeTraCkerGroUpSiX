@@ -2,7 +2,7 @@ using RestApi.Domain;
 
 namespace RestApi.Mappers;
 
-public class CreateExpenseRequest
+public class CreateExpenseRequest :CreateRequestTemplate<Expense>
 {
     public decimal Amount { get; set; }
     public DateTime Date { get; set; }
