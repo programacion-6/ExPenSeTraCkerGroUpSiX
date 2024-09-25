@@ -1,5 +1,7 @@
+version: '3.8'
+
 services:
-  db:
+  db:  # Cambiado de postgres a db
     container_name: helios-db
     image: postgres:12.20-alpine3.20
     ports:
@@ -26,9 +28,19 @@ services:
       - "5001:5001"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=localhost;Port=5432;Database=helios;Username=phaeton;Password=ecliptic
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=helios;Username=phaeton;Password=ecliptic
     volumes:
       - ~/.vscode-server:/root/.vscode-server
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "grupo6@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "grupo654321"
+    ports:
+      - "80:80"
+    depends_on:
+      - db  # Cambiado de postgres a db
 
   swagger:
     image: swaggerapi/swagger-ui
