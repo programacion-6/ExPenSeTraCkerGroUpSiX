@@ -3,7 +3,7 @@ using RestApi.Domain;
 namespace RestApi.Mappers;
 
 
-public class CreateUserRequest:CreateRequestTemplate<User>
+public class CreateUserRequest : CreateRequestTemplate<User>
 {
     public required string Name { get; set; }
     public required string Email { get; set; }
