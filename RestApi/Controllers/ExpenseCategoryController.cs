@@ -9,9 +9,9 @@ public class ExpenseCategoryController : ControllerBase
 {
     private static List<ExpenseCategory> _defaultCategories = new List<ExpenseCategory>
     {
-        new ExpenseCategory { Id = Guid.NewGuid(), Name = "Electronics" },
-        new ExpenseCategory { Id = Guid.NewGuid(), Name = "Transport" },
-        new ExpenseCategory { Id = Guid.NewGuid(), Name = "Products" }
+        new ExpenseCategory { Name = "Electronics" },
+        new ExpenseCategory { Name = "Transport" },
+        new ExpenseCategory { Name = "Products" }
     };
 
     private static List<ExpenseCategory> _customCategories = new List<ExpenseCategory>();
@@ -32,7 +32,6 @@ public class ExpenseCategoryController : ControllerBase
             return BadRequest("Category already exists.");
         }
 
-        newCategory.Id = Guid.NewGuid();
         _customCategories.Add(newCategory);
         return CreatedAtAction(nameof(GetExpenseCategoryById), new { id = newCategory.Id }, newCategory);
     }
