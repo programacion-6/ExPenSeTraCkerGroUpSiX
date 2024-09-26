@@ -1,4 +1,4 @@
-
+namespace RestApi.Mappers;
 
 public interface CreateRequestTemplate<T>
 {

@@ -3,7 +3,6 @@ using RestApi.Persistence.DataBase;
 
 namespace RestApi.RequestPipeline;
 
-
 public static class WebApplicationExtensions
 {
     public static WebApplication InitializeDatabase(this WebApplication app)

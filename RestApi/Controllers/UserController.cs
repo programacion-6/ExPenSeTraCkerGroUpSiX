@@ -34,7 +34,7 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Update([FromBody] User user)
     {
         if (user.Id == Guid.Empty)
-            return BadRequest("El ID del usuario es obligatorio.");
+            return BadRequest("User ID is required.");
 
         var result = await _userManager.UpdateAsync(user.Id, user);
         return result ? NoContent() : NotFound();
@@ -47,4 +47,3 @@ public class UserController : ControllerBase
         return result ? NoContent() : NotFound();
     }
 }
-

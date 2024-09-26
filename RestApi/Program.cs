@@ -1,26 +1,20 @@
 using RestApi.Services;
 using Microsoft.EntityFrameworkCore;
 using RestApi.Persistence.DataBase;
-
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UserManager>();
-builder.Services.AddScoped<ExpenseService>();
-builder.Services.AddScoped<IncomeService>();
+builder.Services.AddScoped<ExpenseService>(); 
+builder.Services.AddScoped<IncomeService>(); 
 builder.Services.AddControllers();
 
 var app = builder.Build();
 
-using (var scope = app.Services.CreateScope())
-{
-    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
-    dbContext.Database.Migrate();  
-}
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -32,5 +26,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
 app.MapControllers();
+
 app.Run();
