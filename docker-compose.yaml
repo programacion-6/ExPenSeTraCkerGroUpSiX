@@ -1,23 +1,7 @@
-name: Ibn
+version: '3.8'
 
 services:
-  # asp.net web application
-  webapp:
-    container_name: api
-    build:
-      context: .
-      dockerfile: Dockerfile
-    ports: 
-      - "5001:5001"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - Database__ConnectionString__DefaultConnection=Host=db;Port=5432;Database=helios;Username=phaeton;Password=ecliptic
-    depends_on:
-      db:
-        condition: service_healthy
-
-  # posgreSQL database
-  db:
+  db:  # Cambiado de postgres a db
     container_name: helios-db
     image: postgres:12.20-alpine3.20
     ports:
@@ -28,11 +12,42 @@ services:
       POSTGRES_PASSWORD: ecliptic
     volumes:
       - postgres_data:/var/lib/postgresql/data
+      - ./src/Ibn/src/Persistence/DataBase/Script:/docker-entrypoint-initdb.d/
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U phaeton -d helios"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+  webapp:
+    container_name: api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports: 
+      - "5001:5001"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=helios;Username=phaeton;Password=ecliptic
+    volumes:
+      - ~/.vscode-server:/root/.vscode-server
+
+  pgadmin:
+    image: dpage/pgadmin4
+    environment:
+      PGADMIN_DEFAULT_EMAIL: "grupo6@admin.com"
+      PGADMIN_DEFAULT_PASSWORD: "grupo654321"
+    ports:
+      - "80:80"
+    depends_on:
+      - db  # Cambiado de postgres a db
+
+  swagger:
+    image: swaggerapi/swagger-ui
+    depends_on:
+      - webapp
+    environment:
+      - SWAGGER_JSON=/api/swagger/v1/swagger.json
+
 volumes:
-  postgres_data:
+  postgres_data: {}
