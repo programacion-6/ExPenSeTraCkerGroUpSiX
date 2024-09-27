@@ -4,6 +4,7 @@ using System.Linq;
 using RestApi.Domain;
 using RestApi.Mappers;
 using RestApi.Services;
+using FluentValidation;
 
 [ApiController]
 [Route("api/v1/[controller]")]
@@ -17,11 +18,22 @@ public class ExpenseCategoryController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> CreateCategory([FromBody] CreateExpenseCategoryRequest request)
+    public async Task<IActionResult> Create([FromBody] CreateExpenseCategoryRequest request)
     {
-        var category = request.ToDomain(); 
-        var createdCategory = await _expenseCategoryService.CreateAsync(category);
-        return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.Id }, createdCategory);
+        var category = request.ToDomain();
+        try
+        {
+            var result = await _expenseCategoryService.CreateAsync(category);
+            return Ok(result);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Errors); 
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "An error occurred.");
+        }
     }
 
     [HttpGet]
