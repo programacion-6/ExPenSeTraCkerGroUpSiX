@@ -3,7 +3,7 @@ using RestApi.Domain;
 using RestApi.Persistence.DataBase;
 using FluentValidation;
 
-namespace RestApi.Services
+namespace RestApi.Services.Concretes
 {
     public class ExpenseCategoryService
     {

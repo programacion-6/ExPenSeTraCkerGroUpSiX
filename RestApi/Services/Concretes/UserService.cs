@@ -1,43 +1,48 @@
 using RestApi.Persistence.DataBase;
 using Microsoft.EntityFrameworkCore;
 using RestApi.Domain;
+using RestApi.Services.interfaces;
 
-namespace RestApi.Services;
+namespace RestApi.Services.Concretes;
 
-public class UserManager
+public class UserService : IBaseService<User>
 {
     private readonly ApplicationDbContext _context;
 
-    public UserManager(ApplicationDbContext context)
+    public UserService(ApplicationDbContext context)
     {
         _context = context;
     }
 
     public async Task<User> CreateAsync(User user)
     {
-        _context.Users.Add(user);
+        _context.User.Add(user);
         await _context.SaveChangesAsync();
         return user;
     }
 
-    public async Task<List<User>> ReadAsync(Guid? id = null)
+    public async Task<List<User>> ReadAsync()
     {
-        var query = _context.Users.AsQueryable();
+        return await _context.User.ToListAsync();           
+    }
+    public async Task<User> ReadAsync(Guid id)
+    {
+        var user = await _context.User.FirstOrDefaultAsync(e => e.Id == id);
+        if (user == null) {
 
-        if (id.HasValue)
-            query = query.Where(u => u.Id == id.Value);
+        }
 
-        return await query.ToListAsync();
+        return user;
     }
 
     public async Task<bool> UpdateAsync(Guid id, User user)
     {
-        var existingUser = await _context.Users.FindAsync(id);
+        var existingUser = await _context.User.FindAsync(id);
         if (existingUser == null) return false;
 
         existingUser.Name = user.Name;
         existingUser.Email = user.Email;
-        existingUser.Password = user.Password; // Asegúrate de encriptar la contraseña
+        existingUser.Password = user.Password;
 
         await _context.SaveChangesAsync();
         return true;
@@ -45,10 +50,10 @@ public class UserManager
 
     public async Task<bool> DeleteAsync(Guid id)
     {
-         var user = await _context.Users.FindAsync(id);
+         var user = await _context.User.FindAsync(id);
         if (user == null) return false;
 
-        _context.Users.Remove(user);
+        _context.User.Remove(user);
         await _context.SaveChangesAsync();
         return true;
     }

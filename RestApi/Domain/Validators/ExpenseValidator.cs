@@ -1,4 +1,4 @@
-namespace RestApi.Domain;
+namespace RestApi.Domain.Validators;
 using FluentValidation;
 
 public class ExpenseValidator: AbstractValidator<Expense>

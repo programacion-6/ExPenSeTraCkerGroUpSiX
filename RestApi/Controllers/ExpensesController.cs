@@ -1,7 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
-using RestApi.Mappers;
-using RestApi.Services;
-using RestApi.Domain;
+using RestApi.Mappers.Concretes;
+using RestApi.Services.Concretes;
 
 namespace RestApi.Controllers
 {
@@ -23,32 +22,35 @@ namespace RestApi.Controllers
             return expense == null ? NotFound() : Ok(expense);
         }
 
-        [HttpPost]
-        public async Task<IActionResult> Create([FromBody] Expense expense)
-        {
-            var result = await _expenseService.CreateAsync(expense);
-            return CreatedAtAction(nameof(Get), new { id = result.Id }, result);
-        }
-
         [HttpGet]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAll([FromQuery] DateTime? date = null, 
+                                                [FromQuery] string? category = null)
         {
-            var expenses = await _expenseService.ReadAsync();
+            var expenses = await _expenseService.GetExpensesAsync(date, category);
             return Ok(expenses);
         }
 
-        [HttpPut("{id:guid}")]
-        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] Expense updatedExpense)
+        [HttpPost]
+        public async Task<IActionResult> Create([FromBody] CreateExpenseRequest request)
         {
+            var expense = request.ToDomain();
+            var result = await _expenseService.CreateAsync(expense);
+            return Ok(CreatedAtAction(nameof(Get), new { id = result.Id }, result).Value);
+        }      
+
+        [HttpPut("{id:guid}")]
+        public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] CreateExpenseRequest request)
+        {
+            var updatedExpense = request.ToDomain();
             var result = await _expenseService.UpdateAsync(id, updatedExpense);
-            return result ? NoContent() : NotFound();
+            return result ? Ok() : NotFound();
         }
 
         [HttpDelete("{id:guid}")]
         public async Task<IActionResult> Delete([FromRoute] Guid id)
         {
             var result = await _expenseService.DeleteAsync(id);
-            return result ? NoContent() : NotFound();
+            return result ? Ok() : NotFound();
         }
     }
 }

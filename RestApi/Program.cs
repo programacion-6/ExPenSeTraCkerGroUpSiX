@@ -1,4 +1,4 @@
-using RestApi.Services;
+using RestApi.Services.Concretes;
 using Microsoft.EntityFrameworkCore;
 using RestApi.Persistence.DataBase;
 using RestApi.Domain;
@@ -9,7 +9,7 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddScoped<UserManager>();
+builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ExpenseService>(); 
 builder.Services.AddScoped<IncomeService>(); 
 builder.Services.AddScoped<ExpenseCategoryService>();

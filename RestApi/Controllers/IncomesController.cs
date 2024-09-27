@@ -1,7 +1,7 @@
 
 using Microsoft.AspNetCore.Mvc;
-using RestApi.Mappers;
-using RestApi.Services;
+using RestApi.Mappers.Concretes;
+using RestApi.Services.Concretes;
 
 namespace RestApi.Controllers;
 
@@ -23,19 +23,19 @@ public class IncomeController : ControllerBase
         return income == null ? NotFound() : Ok(income);
     }
 
+    [HttpGet()]
+    public async Task<IActionResult> GetAll([FromQuery] DateTime? date = null)
+    {
+        var incomes = await _incomeService.GetIncomesAsync(date);
+        return Ok(incomes);
+    }
+
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] CreateIncomeRequest request)
     {
         var income = request.ToDomain();
         var result = await _incomeService.CreateAsync(income);
-        return CreatedAtAction(nameof(Get), new { income.Id }, result);
-    }
-
-    [HttpGet]
-    public async Task<IActionResult> GetAll([FromQuery] DateTime? startDate, [FromQuery] DateTime? endDate, [FromQuery] string category)
-    {
-        var incomes = await _incomeService.ReadAsync(startDate, endDate, category);
-        return Ok(incomes);
+        return Ok(CreatedAtAction(nameof(Get), new { income.Id }, result).Value);
     }
 
     [HttpPut("{id:guid}")]
@@ -43,13 +43,15 @@ public class IncomeController : ControllerBase
     {
         var income = request.ToDomain();
         var result = await _incomeService.UpdateAsync(id, income);
-        return result ? NoContent() : NotFound();
+        return result ? Ok() : NotFound();
     }
 
     [HttpDelete("{id:guid}")]
     public async Task<IActionResult> Delete([FromRoute] Guid id)
     {
         var result = await _incomeService.DeleteAsync(id);
-        return result ? NoContent() : NotFound();
+        return result ? Ok() : NotFound();
     }
+
+    
 }
