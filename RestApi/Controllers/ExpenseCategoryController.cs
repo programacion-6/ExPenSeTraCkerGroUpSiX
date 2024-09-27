@@ -2,76 +2,63 @@ using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Linq;
 using RestApi.Domain;
+using RestApi.Mappers;
+using RestApi.Services;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/[controller]")]
 public class ExpenseCategoryController : ControllerBase
 {
-    private static List<ExpenseCategory> _defaultCategories = new List<ExpenseCategory>
-    {
-        new ExpenseCategory { Name = "Electronics" },
-        new ExpenseCategory { Name = "Transport" },
-        new ExpenseCategory { Name = "Products" }
-    };
+    private readonly ExpenseCategoryService _expenseCategoryService;
 
-    private static List<ExpenseCategory> _customCategories = new List<ExpenseCategory>();
+    public ExpenseCategoryController(ExpenseCategoryService expenseCategoryService)
+    {
+        _expenseCategoryService = expenseCategoryService;
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> CreateCategory([FromBody] CreateExpenseCategoryRequest request)
+    {
+        var category = request.ToDomain(); 
+        var createdCategory = await _expenseCategoryService.CreateAsync(category);
+        return CreatedAtAction(nameof(GetCategoryById), new { id = createdCategory.Id }, createdCategory);
+    }
 
     [HttpGet]
-    public IActionResult GetAllCategories()
+    public async Task<IActionResult> GetAllCategories()
     {
-        var allCategories = _defaultCategories.Concat(_customCategories).ToList();
-        return Ok(allCategories);
+        var categories = await _expenseCategoryService.ReadAsync();
+        return Ok(categories);
     }
 
-    [HttpPost("{Name}")]
-    public IActionResult CreateCustomExpenseCategory([FromRoute] ExpenseCategory newCategory)
+    [HttpGet("{id:guid}")]
+    public async Task<IActionResult> GetCategoryById(Guid id)
     {
-        if (_defaultCategories.Any(category => category.Name.Equals(newCategory.Name)) ||
-            _customCategories.Any(category => category.Name.Equals(newCategory.Name)))
-        {
-            return BadRequest("Category already exists.");
-        }
-
-        _customCategories.Add(newCategory);
-        return CreatedAtAction(nameof(GetExpenseCategoryById), new { id = newCategory.Id }, newCategory);
-    }
-
-    [HttpGet("{id}")]
-    public IActionResult GetExpenseCategoryById(Guid id)
-    {
-        var category = _defaultCategories.Find(category => category.Id == id) ??
-                       _customCategories.Find(category => category.Id == id);
-
-        if (category == null)
-        {
-            return NotFound();
-        }
+        var category = await _expenseCategoryService.ReadAsync(id);
+        if (category == null) return NotFound();
         return Ok(category);
     }
 
-    [HttpPut("{id}")]
-    public IActionResult UpdateExpenseCustomCategory(Guid id, [FromBody] ExpenseCategory updatedCategory)
+    [HttpPut("{id:guid}")]
+    public async Task<IActionResult> UpdateCategory(Guid id, [FromBody] ExpenseCategory updatedCategory)
     {
-        var category = _customCategories.FirstOrDefault(category => category.Id == id);
-        if (category == null)
-        {
-            return BadRequest("Custom expense category not found.");
-        }
+        var existingCategory = await _expenseCategoryService.ReadAsync(id);
 
-        category.Name = updatedCategory.Name;
-        return NoContent();  
+        if (existingCategory == null) return NotFound();
+        var result = await _expenseCategoryService.UpdateAsync(id, updatedCategory);
+        if (!result) return NotFound();
+        return NoContent();
     }
 
-    [HttpDelete("{id}")]
-    public IActionResult DeleteExpenseCustomCategory(Guid id)
+    [HttpDelete("{id:guid}")]
+    public async Task<IActionResult> DeleteCategory(Guid id)
     {
-        var category = _customCategories.FirstOrDefault(category => category.Id == id);
-        if (category == null)
-        {
-            return BadRequest("Custom expense category not found.");
-        }
+        var existingCategory = await _expenseCategoryService.ReadAsync(id);
 
-        _customCategories.Remove(category);
+        if (existingCategory == null) return NotFound();
+
+        var result = await _expenseCategoryService.DeleteAsync(id);
+        if (!result) return NotFound();
         return NoContent();
     }
 }

@@ -10,6 +10,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UserManager>();
 builder.Services.AddScoped<ExpenseService>(); 
 builder.Services.AddScoped<IncomeService>(); 
+builder.Services.AddScoped<ExpenseCategoryService>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
