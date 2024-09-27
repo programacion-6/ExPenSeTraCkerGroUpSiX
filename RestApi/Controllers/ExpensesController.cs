@@ -5,7 +5,7 @@ using RestApi.Services.Concretes;
 namespace RestApi.Controllers
 {
     [ApiController]
-    [Route("api/v1/[controller]")]
+    [Route("api/v1/expenses")]
     public class ExpenseController : ControllerBase
     {
         private readonly ExpenseService _expenseService;

@@ -7,7 +7,7 @@ using RestApi.Services.Concretes;
 namespace RestApi.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v1/users")]
 public class UserController : ControllerBase
 {
     private readonly UserService _userManager;

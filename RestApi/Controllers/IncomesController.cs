@@ -6,7 +6,7 @@ using RestApi.Services.Concretes;
 namespace RestApi.Controllers;
 
 [ApiController]
-[Route("api/v1/[controller]")]
+[Route("api/v1/incomes")]
 public class IncomeController : ControllerBase
 {
     private readonly IncomeService _incomeService;
