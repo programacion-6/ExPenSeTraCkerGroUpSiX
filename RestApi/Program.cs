@@ -1,6 +1,8 @@
 using RestApi.Services;
 using Microsoft.EntityFrameworkCore;
 using RestApi.Persistence.DataBase;
+using RestApi.Domain;
+using FluentValidation;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ApplicationDbContext>(options =>
@@ -10,10 +12,11 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddScoped<UserManager>();
 builder.Services.AddScoped<ExpenseService>(); 
 builder.Services.AddScoped<IncomeService>(); 
+builder.Services.AddScoped<ExpenseCategoryService>();
+builder.Services.AddScoped<IValidator<ExpenseCategory>, ExpenseCategoryValidator>();
 builder.Services.AddControllers();
 
 var app = builder.Build();
-
 
 if (app.Environment.IsDevelopment())
 {
@@ -24,7 +27,6 @@ if (app.Environment.IsDevelopment())
         options.RoutePrefix = string.Empty; 
     });
 }
-
 app.UseHttpsRedirection();
 
 app.MapControllers();
