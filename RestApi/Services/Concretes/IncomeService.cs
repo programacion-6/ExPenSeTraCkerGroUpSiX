@@ -22,16 +22,16 @@ public class IncomeService : IBaseService<Income>
     }
 
     public async Task<List<Income>> ReadAsync()
-        {
-            return await _context.Income
-                .Where(e => e.UserId == UserContext.CurrentUserId)
-                .ToListAsync();
-        }
+    {
+        return await _context.Income
+            .Where(e => e.UserId == UserContext.CurrentUserId)
+            .ToListAsync();
+    }
 
-        public async Task<Income?> ReadAsync(Guid id)
-        {
-            return await _context.Income.FirstOrDefaultAsync(e => e.Id == id);
-        }
+    public async Task<Income?> ReadAsync(Guid id)
+    {
+        return await _context.Income.FirstOrDefaultAsync(e => e.Id == id);
+    }
 
     public async Task<bool> UpdateAsync(Guid id, Income income)
     {
