@@ -28,7 +28,7 @@ public class ExpenseCategoryController : ControllerBase
         }
         catch (ValidationException ex)
         {
-            return BadRequest(ex.Errors); 
+            return BadRequest(ex.Errors);
         }
         catch (Exception ex)
         {
@@ -55,11 +55,22 @@ public class ExpenseCategoryController : ControllerBase
     public async Task<IActionResult> UpdateCategory(Guid id, [FromBody] ExpenseCategory updatedCategory)
     {
         var existingCategory = await _expenseCategoryService.ReadAsync(id);
-
         if (existingCategory == null) return NotFound();
-        var result = await _expenseCategoryService.UpdateAsync(id, updatedCategory);
-        if (!result) return NotFound();
-        return NoContent();
+        try
+        {
+            var result = await _expenseCategoryService.UpdateAsync(id, updatedCategory);
+            if (!result) return NotFound();
+            return NoContent();
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(ex.Errors);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, "An error occurred.");
+        }
+
     }
 
     [HttpDelete("{id:guid}")]
