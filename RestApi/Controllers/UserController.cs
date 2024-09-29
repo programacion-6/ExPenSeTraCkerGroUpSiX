@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using RestApi.Domain;
 using RestApi.Mappers.Concretes;
@@ -12,10 +13,12 @@ namespace RestApi.Controllers;
 public class UserController : ControllerBase
 {
     private readonly UserService _userManager;
+    private readonly IValidator<User> _validator;
 
-    public UserController(UserService userManager)
+    public UserController(UserService userManager, IValidator<User> validator)
     {
         _userManager = userManager;
+        _validator = validator;
     }
 
     [HttpGet("{id:guid}")]
@@ -36,37 +39,39 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateUserRequest request)
     {
         var user = request.ToDomain();
-        try
-        {
-            var createdUser = await _userManager.CreateAsync(user);
-            return Ok(CreatedAtAction(nameof(Get), new { id = createdUser.Id }, createdUser));
-        }
-        catch (ValidationException ex)
+        var validationResult = await _validator.ValidateAsync(user);
+        if (!validationResult.IsValid)
         {
             return BadRequest(new ProblemDetails
             {
                 Title = "Validation Error",
                 Status = StatusCodes.Status400BadRequest,
-                Detail = ex.Message 
+                Detail = validationResult.Errors.FirstOrDefault().ErrorMessage
             });
         }
-        catch (ArgumentNullException ex)
-        {
-            return BadRequest(new ProblemDetails
-            {
-                Title = "Invalid Argument",
-                Status = StatusCodes.Status400BadRequest,
-                Detail = ex.Message
-            });
-        }
+
+        var createdUser = await _userManager.CreateAsync(user);
+        return Ok(CreatedAtAction(nameof(Get), new { id = createdUser.Id }, createdUser));
+
         
     }
 
-    [HttpPut("profile")]
-    public async Task<IActionResult> Update([FromBody] CreateUserRequest request)
+    [HttpPut("profile/{id:guid}")]
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] CreateUserRequest request)
     {
         var user = request.ToDomain();
-        var result = await _userManager.UpdateAsync(user.Id, user);
+        var validationResult = await _validator.ValidateAsync(user);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Validation Error",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = validationResult.Errors.FirstOrDefault().ErrorMessage
+            });
+        }
+
+        var result = await _userManager.UpdateAsync(id, user);
         return result ? Ok() : NotFound();
     }
 

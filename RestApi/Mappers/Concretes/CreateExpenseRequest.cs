@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore;
 using RestApi.Domain;
 using RestApi.Mappers.Interfaces;
 using RestApi.Persistence.DataBase;
@@ -9,7 +10,7 @@ public class CreateExpenseRequest : CreateRequestTemplate<Expense>
     public decimal Amount { get; set; }
     public DateTime Date { get; set; }
     public required string Description { get; set; }
-    public required ExpenseCategory Category { get; set; }
+    public required string Category { get; set; }
 
     public Expense ToDomain()
     {
@@ -19,7 +20,7 @@ public class CreateExpenseRequest : CreateRequestTemplate<Expense>
             Amount = Amount,
             Date = Date,
             Description = Description,
-            Category = Category
+            Category = null,
         };
     }
 }

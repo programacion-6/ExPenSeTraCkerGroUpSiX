@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using RestApi.Domain;
@@ -9,21 +10,14 @@ namespace RestApi.Services.Concretes;
 public class ExpenseService : IBaseService<Expense>
 {
     private readonly ApplicationDbContext _context;
-    private readonly IValidator<Expense> _validator;
 
-    public ExpenseService(ApplicationDbContext context, IValidator<Expense> validator)
+    public ExpenseService(ApplicationDbContext context)
     {
         _context = context;
-        _validator = validator;
     }
 
     public async Task<Expense> CreateAsync(Expense expense)
     {
-        var validationResult = await _validator.ValidateAsync(expense);
-            if (!validationResult.IsValid)
-            {
-                throw new ValidationException(validationResult.Errors);
-            }
         _context.Expense.Add(expense);
         await _context.SaveChangesAsync();
         return expense;
@@ -86,5 +80,22 @@ public class ExpenseService : IBaseService<Expense>
             query = query.Where(e => e.Category.Name == category);
 
         return await query.Include(e => e.Category).ToListAsync();
+    }
+
+    public async Task ValidateCategory(Expense expense, string NameCategory) 
+    {
+        var category = await FindCategoryAsync(NameCategory);
+        if (category == null)
+        {
+            throw new ArgumentException($"Category does not exist.");
+        }
+
+        expense.Category = category;
+    }
+
+    public async Task<ExpenseCategory> FindCategoryAsync(string NameCategory) 
+    {
+        var category = await _context.ExpenseCategory.FirstOrDefaultAsync(c => c.Name == NameCategory);
+        return category;
     }
 }

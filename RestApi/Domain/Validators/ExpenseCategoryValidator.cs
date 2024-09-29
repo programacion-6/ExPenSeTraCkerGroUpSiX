@@ -1,8 +1,6 @@
 using FluentValidation;
 using RestApi.Persistence.DataBase;
-using RestApi.Domain;
 using Microsoft.EntityFrameworkCore;
-using RestApi.Persistence.DataBase;
 
 namespace RestApi.Domain.Validators;
 

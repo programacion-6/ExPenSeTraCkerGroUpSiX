@@ -1,5 +1,6 @@
-using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using RestApi.Domain;
 using RestApi.Mappers.Concretes;
 using RestApi.Services.Concretes;
 
@@ -10,10 +11,12 @@ namespace RestApi.Controllers
     public class ExpenseController : ControllerBase
     {
         private readonly ExpenseService _expenseService;
+        private readonly IValidator<Expense> _validator;
 
-        public ExpenseController(ExpenseService expenseService)
+        public ExpenseController(ExpenseService expenseService, IValidator<Expense> validator)
         {
             _expenseService = expenseService;
+            _validator = validator;
         }
 
         [HttpGet("{id:guid}")]
@@ -34,39 +37,68 @@ namespace RestApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateExpenseRequest request)
         {
-            var expense = request.ToDomain();
-            try
+            try 
             {
+                var expense = request.ToDomain();
+                await _expenseService.ValidateCategory(expense, request.Category);
+
+                var validationResult = await _validator.ValidateAsync(expense);
+                if (!validationResult.IsValid)
+                {
+                    return BadRequest(new ProblemDetails
+                    {
+                        Title = "Validation Error",
+                        Status = StatusCodes.Status400BadRequest,
+                        Detail = validationResult.Errors.FirstOrDefault().ErrorMessage
+                    });
+                }
+
                 var result = await _expenseService.CreateAsync(expense);
-                return Ok(CreatedAtAction(nameof(Get), new { id = result.Id }, result).Value);
-            }
-            catch (ValidationException ex)
+                return Ok(CreatedAtAction(nameof(Get), new { id = result.Id }, result).Value);     
+            } 
+            catch (ArgumentException ex)
             {
                 return BadRequest(new ProblemDetails
                 {
                     Title = "Validation Error",
                     Status = StatusCodes.Status400BadRequest,
-                    Detail = ex.Message 
-                });
-            }
-            catch (ArgumentNullException ex)
-            {
-                return BadRequest(new ProblemDetails
-                {
-                    Title = "Invalid Argument",
-                    Status = StatusCodes.Status400BadRequest,
                     Detail = ex.Message
                 });
             }
-                        
+            
         }      
 
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] CreateExpenseRequest request)
         {
-            var updatedExpense = request.ToDomain();
-            var result = await _expenseService.UpdateAsync(id, updatedExpense);
-            return result ? Ok() : NotFound();
+            try 
+            {
+                var updatedExpense = request.ToDomain();
+                await _expenseService.ValidateCategory(updatedExpense, request.Category);
+
+                var validationResult = await _validator.ValidateAsync(updatedExpense);
+                if (!validationResult.IsValid)
+                {
+                    return BadRequest(new ProblemDetails
+                    {
+                        Title = "Validation Error",
+                        Status = StatusCodes.Status400BadRequest,
+                        Detail = validationResult.Errors.FirstOrDefault().ErrorMessage
+                    });
+                }
+
+                var result = await _expenseService.UpdateAsync(id, updatedExpense);
+                return result ? Ok() : NotFound();
+            } 
+            catch (ArgumentException ex)
+            {
+                return BadRequest(new ProblemDetails
+                {
+                    Title = "Validation Error",
+                    Status = StatusCodes.Status400BadRequest,
+                    Detail = ex.Message
+                });
+            }
         }
 
         [HttpDelete("{id:guid}")]

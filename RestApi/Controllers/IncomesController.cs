@@ -1,6 +1,8 @@
 
 using System.ComponentModel.DataAnnotations;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
+using RestApi.Domain;
 using RestApi.Mappers.Concretes;
 using RestApi.Services.Concretes;
 
@@ -11,9 +13,11 @@ namespace RestApi.Controllers;
 public class IncomeController : ControllerBase
 {
     private readonly IncomeService _incomeService;
-    public IncomeController(IncomeService incomeService)
+    private readonly IValidator<Income> _validator;
+    public IncomeController(IncomeService incomeService, IValidator<Income> validator)
     {
         _incomeService = incomeService;
+        _validator = validator;
     }
 
     [HttpGet("{id:guid}")]
@@ -35,36 +39,37 @@ public class IncomeController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateIncomeRequest request)
     {
         var income = request.ToDomain();
-        try
-        {
-            var result = await _incomeService.CreateAsync(income);
-            return Ok(CreatedAtAction(nameof(Get), new { income.Id }, result).Value);
-        }
-        catch (ValidationException ex)
+        var validationResult = await _validator.ValidateAsync(income);
+        if (!validationResult.IsValid)
         {
             return BadRequest(new ProblemDetails
             {
                 Title = "Validation Error",
                 Status = StatusCodes.Status400BadRequest,
-                Detail = ex.Message 
+                Detail = validationResult.Errors.FirstOrDefault().ErrorMessage
             });
         }
-        catch (ArgumentNullException ex)
-        {
-            return BadRequest(new ProblemDetails
-            {
-                Title = "Invalid Argument",
-                Status = StatusCodes.Status400BadRequest,
-                Detail = ex.Message
-            });
-        }
-       
+        
+        var result = await _incomeService.CreateAsync(income);
+        return Ok(CreatedAtAction(nameof(Get), new { income.Id }, result).Value);
+
     }
 
     [HttpPut("{id:guid}")]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] CreateIncomeRequest request)
     {
         var income = request.ToDomain();
+        var validationResult = await _validator.ValidateAsync(income);
+        if (!validationResult.IsValid)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Validation Error",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = validationResult.Errors.FirstOrDefault().ErrorMessage
+            });
+        }
+
         var result = await _incomeService.UpdateAsync(id, income);
         return result ? Ok() : NotFound();
     }
