@@ -5,10 +5,10 @@ namespace RestApi.Persistence.DataBase;
 
 public class ApplicationDbContext : DbContext
 {
-    public DbSet<User> Users { get; set; }
+    public DbSet<User> User { get; set; }
     public DbSet<ExpenseCategory> ExpenseCategory { get; set; }
-    public DbSet<Expense> Expenses { get; set; }
-    public DbSet<Income> Incomes { get; set; }
+    public DbSet<Expense> Expense { get; set; }
+    public DbSet<Income> Income { get; set; }
 
     public ApplicationDbContext(DbContextOptions<ApplicationDbContext> options) : base(options)
     {

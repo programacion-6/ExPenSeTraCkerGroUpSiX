@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using RestApi.Mappers.Concretes;
 using RestApi.Services.Concretes;
@@ -34,8 +35,30 @@ namespace RestApi.Controllers
         public async Task<IActionResult> Create([FromBody] CreateExpenseRequest request)
         {
             var expense = request.ToDomain();
-            var result = await _expenseService.CreateAsync(expense);
-            return Ok(CreatedAtAction(nameof(Get), new { id = result.Id }, result).Value);
+            try
+            {
+                var result = await _expenseService.CreateAsync(expense);
+                return Ok(CreatedAtAction(nameof(Get), new { id = result.Id }, result).Value);
+            }
+            catch (ValidationException ex)
+            {
+                return BadRequest(new ProblemDetails
+                {
+                    Title = "Validation Error",
+                    Status = StatusCodes.Status400BadRequest,
+                    Detail = ex.Message 
+                });
+            }
+            catch (ArgumentNullException ex)
+            {
+                return BadRequest(new ProblemDetails
+                {
+                    Title = "Invalid Argument",
+                    Status = StatusCodes.Status400BadRequest,
+                    Detail = ex.Message
+                });
+            }
+                        
         }      
 
         [HttpPut("{id:guid}")]

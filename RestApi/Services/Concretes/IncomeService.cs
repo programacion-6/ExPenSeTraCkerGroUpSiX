@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using RestApi.Domain;
 using RestApi.Persistence.DataBase;
@@ -8,14 +9,21 @@ namespace RestApi.Services.Concretes;
 public class IncomeService : IBaseService<Income>
 {
     private readonly ApplicationDbContext _context;
+    private readonly IValidator<Income> _validator;
 
-    public IncomeService(ApplicationDbContext context)
+    public IncomeService(ApplicationDbContext context, IValidator<Income> validator)
     {
         _context = context;
+        _validator = validator;
     }
 
     public async Task<Income> CreateAsync(Income income)
     {
+        var validationResult = await _validator.ValidateAsync(income);
+        if (!validationResult.IsValid)
+        {
+            throw new ValidationException(validationResult.Errors);
+        }
         _context.Income.Add(income);
         await _context.SaveChangesAsync();
         return income;

@@ -4,6 +4,8 @@ using RestApi.Domain;
 using Microsoft.EntityFrameworkCore;
 using RestApi.Persistence.DataBase;
 
+namespace RestApi.Domain.Validators;
+
 public class ExpenseCategoryValidator : AbstractValidator<ExpenseCategory>
 {
     private readonly ApplicationDbContext _context;

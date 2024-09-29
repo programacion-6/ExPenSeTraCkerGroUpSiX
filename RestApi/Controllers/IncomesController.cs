@@ -1,4 +1,5 @@
 
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using RestApi.Mappers.Concretes;
 using RestApi.Services.Concretes;
@@ -34,8 +35,30 @@ public class IncomeController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateIncomeRequest request)
     {
         var income = request.ToDomain();
-        var result = await _incomeService.CreateAsync(income);
-        return Ok(CreatedAtAction(nameof(Get), new { income.Id }, result).Value);
+        try
+        {
+            var result = await _incomeService.CreateAsync(income);
+            return Ok(CreatedAtAction(nameof(Get), new { income.Id }, result).Value);
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Validation Error",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = ex.Message 
+            });
+        }
+        catch (ArgumentNullException ex)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Invalid Argument",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = ex.Message
+            });
+        }
+       
     }
 
     [HttpPut("{id:guid}")]

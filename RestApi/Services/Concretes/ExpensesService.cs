@@ -1,3 +1,4 @@
+using FluentValidation;
 using Microsoft.EntityFrameworkCore;
 using RestApi.Domain;
 using RestApi.Persistence.DataBase;
@@ -8,14 +9,21 @@ namespace RestApi.Services.Concretes;
 public class ExpenseService : IBaseService<Expense>
 {
     private readonly ApplicationDbContext _context;
+    private readonly IValidator<Expense> _validator;
 
-    public ExpenseService(ApplicationDbContext context)
+    public ExpenseService(ApplicationDbContext context, IValidator<Expense> validator)
     {
         _context = context;
+        _validator = validator;
     }
 
     public async Task<Expense> CreateAsync(Expense expense)
     {
+        var validationResult = await _validator.ValidateAsync(expense);
+            if (!validationResult.IsValid)
+            {
+                throw new ValidationException(validationResult.Errors);
+            }
         _context.Expense.Add(expense);
         await _context.SaveChangesAsync();
         return expense;

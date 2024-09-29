@@ -1,3 +1,4 @@
+using System.ComponentModel.DataAnnotations;
 using Microsoft.AspNetCore.Mvc;
 using RestApi.Domain;
 using RestApi.Mappers.Concretes;
@@ -35,8 +36,30 @@ public class UserController : ControllerBase
     public async Task<IActionResult> Create([FromBody] CreateUserRequest request)
     {
         var user = request.ToDomain();
-        var createdUser = await _userManager.CreateAsync(user);
-        return Ok(CreatedAtAction(nameof(Get), new { id = createdUser.Id }, createdUser));
+        try
+        {
+            var createdUser = await _userManager.CreateAsync(user);
+            return Ok(CreatedAtAction(nameof(Get), new { id = createdUser.Id }, createdUser));
+        }
+        catch (ValidationException ex)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Validation Error",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = ex.Message 
+            });
+        }
+        catch (ArgumentNullException ex)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Title = "Invalid Argument",
+                Status = StatusCodes.Status400BadRequest,
+                Detail = ex.Message
+            });
+        }
+        
     }
 
     [HttpPut("profile")]
