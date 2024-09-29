@@ -1,5 +1,6 @@
 using FluentValidation.Results;
 using RestApi.Domain;
+using RestApi.Domain.Validators;
 
 namespace RestApi.Tests.Domain;
 
@@ -11,6 +12,7 @@ public class ExpenseTest
       Expense expense = new()
       {
          Id = new Guid(),
+         UserId = new Guid(),
          Amount = 1,
          Date = new DateTime(2000, 1, 1),
          Description = "This is a valid expense",

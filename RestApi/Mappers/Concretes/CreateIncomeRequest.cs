@@ -1,8 +1,10 @@
 using RestApi.Domain;
+using RestApi.Mappers.Interfaces;
+using RestApi.Persistence.DataBase;
 
-namespace RestApi.Mappers;
+namespace RestApi.Mappers.Concretes;
 
-public record CreateIncomeRequest :CreateRequestTemplate<Income>
+public record CreateIncomeRequest : CreateRequestTemplate<Income>
 {
     public required decimal Amount { get; set; }
     public required DateTime Date { get; set; }
@@ -11,6 +13,7 @@ public record CreateIncomeRequest :CreateRequestTemplate<Income>
     {
         return new Income
         {
+            UserId = UserContext.CurrentUserId,
             Amount = Amount,
             Date = Date,
             Source = Source

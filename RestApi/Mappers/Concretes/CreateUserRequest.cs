@@ -1,6 +1,7 @@
 using RestApi.Domain;
+using RestApi.Mappers.Interfaces;
 
-namespace RestApi.Mappers;
+namespace RestApi.Mappers.Concretes;
 
 public class CreateUserRequest : CreateRequestTemplate<User>
 {
