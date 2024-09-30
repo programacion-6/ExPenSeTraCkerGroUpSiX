@@ -27,8 +27,10 @@ services:
     ports: 
       - "5001:5001"
     environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Host=db;Port=5432;Database=helios;Username=phaeton;Password=ecliptic
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Host=db;Port=5432;Database=helios;Username=phaeton;Password=ecliptic
+      EmailAddress: no_reply_group6@zohomail.com
+      EmailPassword: 'S?!F~SKi9j&2B,E'
     volumes:
       - ~/.vscode-server:/root/.vscode-server
 
