@@ -8,6 +8,8 @@ on:
 
 env:
   DOTNET_VERSION: '8.0' # The .NET SDK version to use
+  EmailAddress: ${{ secrets.EmailAddress }}
+  EmailPassword: ${{ secrets.EmailPassword }}
 
 permissions:
   pull-requests: write
