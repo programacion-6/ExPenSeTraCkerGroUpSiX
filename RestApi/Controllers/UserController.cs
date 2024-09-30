@@ -3,7 +3,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using RestApi.Domain;
 using RestApi.Mappers.Concretes;
-using RestApi.Persistence.DataBase;
+using RestApi.JWT;
 using RestApi.Services.Concretes; 
 
 namespace RestApi.Controllers;
@@ -82,11 +82,5 @@ public class UserController : ControllerBase
         return result ? Ok() : NotFound();
     }
 
-    [HttpPost("Login")]
-    public async Task<IActionResult> Login([FromBody] Guid id)
-    {
-        UserContext.CurrentUserId = id;
-        return Ok();
-    }
 
 }

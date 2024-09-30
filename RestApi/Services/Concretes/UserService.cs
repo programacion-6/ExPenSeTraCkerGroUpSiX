@@ -3,13 +3,15 @@ using Microsoft.EntityFrameworkCore;
 using RestApi.Domain;
 using RestApi.Services.interfaces;
 using FluentValidation;
-
+using RestApi.JWT;
 namespace RestApi.Services.Concretes;
 
 public class UserService : IBaseService<User>
 {
     private readonly ApplicationDbContext _context;
     private readonly IValidator<User> _validator;
+    private readonly TokenHandler _tokenHandler;
+
     public UserService(ApplicationDbContext context, IValidator<User> validator)
     {
         _context = context;
@@ -63,5 +65,18 @@ public class UserService : IBaseService<User>
         _context.User.Remove(user);
         await _context.SaveChangesAsync();
         return true;
+    }
+    public async Task<string> Login(string email, string password)
+    {
+        var userFound = await _context.User.FirstOrDefaultAsync(u => u.Email == email);
+        UserContext.CurrentUserId = userFound.Id; // Establece el ID del usuario actual.
+
+        if (userFound != null && userFound.Password == password) // Compara directamente las contraseñas
+        {
+            // Si la contraseña coincide, genera y devuelve el token
+            return _tokenHandler.GenerateToken(userFound);
+        }
+
+        throw new AuthenticationException("Invalid email or password");
     }
 }
