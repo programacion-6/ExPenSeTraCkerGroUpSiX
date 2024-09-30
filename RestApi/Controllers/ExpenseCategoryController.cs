@@ -1,13 +1,14 @@
 using Microsoft.AspNetCore.Mvc;
-using System.Collections.Generic;
-using System.Linq;
 using RestApi.Domain;
 using RestApi.Mappers.Concretes;
 using RestApi.Services.Concretes;
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
+
 
 [ApiController]
 [Route("api/v1/[controller]")]
+[Authorize]
 public class ExpenseCategoryController : ControllerBase
 {
     private readonly ExpenseCategoryService _expenseCategoryService;

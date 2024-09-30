@@ -3,11 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 using RestApi.Domain;
 using RestApi.Mappers.Concretes;
 using RestApi.Services.Concretes;
+using Microsoft.AspNetCore.Authorization;
 
 namespace RestApi.Controllers
 {
     [ApiController]
     [Route("api/v1/expenses")]
+    [Authorize]
+
     public class ExpenseController : ControllerBase
     {
         private readonly ExpenseService _expenseService;
