@@ -10,14 +10,20 @@ builder.Services.AddDbContext<ApplicationDbContext>(options =>
     options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
 builder.Services.AddScoped<UserService>();
 builder.Services.AddScoped<ExpenseService>(); 
 builder.Services.AddScoped<IncomeService>(); 
 builder.Services.AddScoped<ExpenseCategoryService>();
+
 builder.Services.AddScoped<IValidator<ExpenseCategory>, ExpenseCategoryValidator>();
 builder.Services.AddScoped<IValidator<Expense>, ExpenseValidator>();
 builder.Services.AddScoped<IValidator<Income>, IncomeValidator>();
+
 builder.Services.AddScoped<IValidator<User>, UserValidator>();
+builder.Services.AddScoped<IValidator<User>, UserProfileValidator>();
+builder.Services.AddScoped<IValidator<User.PasswordUpdate>, UserPasswordResetValidator>();
+
 builder.Services.AddControllers();
 
 var app = builder.Build();

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RestApi.Domain;
 using RestApi.Services.interfaces;
 using FluentValidation;
+using MimeKit;
 
 namespace RestApi.Services.Concretes;
 
@@ -49,12 +50,21 @@ public class UserService : IBaseService<User>
 
         existingUser.Name = user.Name;
         existingUser.Email = user.Email;
-        existingUser.Password = user.Password;
 
         await _context.SaveChangesAsync();
         return true;
     }
 
+    public async Task<bool> UpdateAsync(Guid id, User.PasswordUpdate user)
+    {
+        var existingUser = await _context.User.FindAsync(id);
+        if (existingUser == null) return false;
+        
+        existingUser.Password = user.Password;
+        await _context.SaveChangesAsync();
+        return true;
+    }
+    
     public async Task<bool> DeleteAsync(Guid id)
     {
          var user = await _context.User.FindAsync(id);
@@ -63,5 +73,17 @@ public class UserService : IBaseService<User>
         _context.User.Remove(user);
         await _context.SaveChangesAsync();
         return true;
+    }
+
+    public void PasswordReset(User user)
+    {
+        var email = new MimeMessage();
+        email.To.Add(new MailboxAddress(user.Name, user.Email));
+        email.Subject = "Password Reset";
+        email.Body = new TextPart("plain")
+        {
+            Text = "Password reset code is: 9090"
+        };
+        EmailNotifier.SendEmail(email);
     }
 }
