@@ -8,12 +8,12 @@ namespace RestApi.Controllers
 {
     [ApiController]
     [Route("api/v1/expenses")]
-    public class ExpenseController : ControllerBase
+    public class InsightsController : ControllerBase
     {
         private readonly ExpenseService _expenseService;
         private readonly IValidator<Expense> _validator;
 
-        public ExpenseController(ExpenseService expenseService, IValidator<Expense> validator)
+        public InsightsController(ExpenseService expenseService, IValidator<Expense> validator)
         {
             _expenseService = expenseService;
             _validator = validator;
@@ -27,7 +27,7 @@ namespace RestApi.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] DateTime? date = null, 
+        public async Task<IActionResult> GetAll([FromQuery] DateTime? date = null,
                                                 [FromQuery] string? category = null)
         {
             var expenses = await _expenseService.GetExpensesAsync(date, category);
@@ -37,7 +37,7 @@ namespace RestApi.Controllers
         [HttpPost]
         public async Task<IActionResult> Create([FromBody] CreateExpenseRequest request)
         {
-            try 
+            try
             {
                 var expense = request.ToDomain();
                 await _expenseService.ValidateCategory(expense, request.Category);
@@ -54,8 +54,8 @@ namespace RestApi.Controllers
                 }
 
                 var result = await _expenseService.CreateAsync(expense);
-                return Ok(CreatedAtAction(nameof(Get), new { id = result.Id }, result).Value);     
-            } 
+                return Ok(CreatedAtAction(nameof(Get), new { id = result.Id }, result).Value);
+            }
             catch (ArgumentException ex)
             {
                 return BadRequest(new ProblemDetails
@@ -65,13 +65,13 @@ namespace RestApi.Controllers
                     Detail = ex.Message
                 });
             }
-            
-        }      
+
+        }
 
         [HttpPut("{id:guid}")]
         public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] CreateExpenseRequest request)
         {
-            try 
+            try
             {
                 var updatedExpense = request.ToDomain();
                 await _expenseService.ValidateCategory(updatedExpense, request.Category);
@@ -89,7 +89,7 @@ namespace RestApi.Controllers
 
                 var result = await _expenseService.UpdateAsync(id, updatedExpense);
                 return result ? Ok() : NotFound();
-            } 
+            }
             catch (ArgumentException ex)
             {
                 return BadRequest(new ProblemDetails

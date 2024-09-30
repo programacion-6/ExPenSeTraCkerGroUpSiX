@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using RestApi.Domain;
 using RestApi.Persistence.DataBase;
 using RestApi.Services.interfaces;
+using System.Globalization;
 
 namespace RestApi.Services.Concretes;
 
@@ -64,7 +65,7 @@ public class ExpenseService : IBaseService<Expense>
 
     public async Task<List<Expense>> GetExpensesAsync(DateTime? date, string category)
     {
-        if (!date.HasValue && string.IsNullOrEmpty(category)) 
+        if (!date.HasValue && string.IsNullOrEmpty(category))
         {
             return await ReadAsync();
         }
@@ -82,7 +83,7 @@ public class ExpenseService : IBaseService<Expense>
         return await query.Include(e => e.Category).ToListAsync();
     }
 
-    public async Task ValidateCategory(Expense expense, string NameCategory) 
+    public async Task ValidateCategory(Expense expense, string NameCategory)
     {
         var category = await FindCategoryAsync(NameCategory);
         if (category == null)
@@ -93,9 +94,53 @@ public class ExpenseService : IBaseService<Expense>
         expense.Category = category;
     }
 
-    public async Task<ExpenseCategory> FindCategoryAsync(string NameCategory) 
+    public async Task<ExpenseCategory> FindCategoryAsync(string NameCategory)
     {
         var category = await _context.ExpenseCategory.FirstOrDefaultAsync(c => c.Name == NameCategory);
         return category;
+    }
+
+    public async Task<string> GetMonthWithMostExpensesAsync()
+    {
+        var expensesGroupedByMonth = await _context.Expense
+            .GroupBy(date => date.Date.Month)
+            .Select(group => new
+            {
+                Month = group.Key,
+                TotalExpenses = group.Sum(amount => amount.Amount)
+            })
+            .OrderByDescending(amount => amount.TotalExpenses)
+            .FirstOrDefaultAsync();
+
+        if (expensesGroupedByMonth == null)
+        {
+            return "Not there registered expenses.";
+        }
+
+        var monthName = CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(expensesGroupedByMonth.Month);
+        return $"{monthName} is the month with more expense, total: {expensesGroupedByMonth.TotalExpenses}.";
+    }
+
+    public async Task<string> GetCategoryWithMostExpensesAsync()
+    {
+        var expensesGroupedByCategory = await _context.Expense
+            .GroupBy(category => category.Category)
+            .Select(group => new
+            {
+                Category = group.Key,
+                TotalExpenses = group.Sum(amount => amount.Amount)
+            })
+            .OrderByDescending(amount => amount.TotalExpenses)
+            .FirstOrDefaultAsync();
+
+        if (expensesGroupedByCategory == null)
+        {
+            return "Not there registered expenses.";
+        }
+
+        var category = await _context.ExpenseCategory
+            .FirstOrDefaultAsync(category => category.Id == expensesGroupedByCategory.Category.Id);
+
+        return $"{category.Name} category with more expense, total: {expensesGroupedByCategory.TotalExpenses}.";
     }
 }
