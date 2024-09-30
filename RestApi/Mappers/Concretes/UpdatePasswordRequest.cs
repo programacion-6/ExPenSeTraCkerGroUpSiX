@@ -5,8 +5,8 @@ namespace RestApi.Mappers.Concretes;
 
 public class UpdatePasswordRequest : CreateRequestTemplate<User.PasswordUpdate>
 {
-    
-    public required int Code  { get; set; }
+
+    public required string Code  { get; set; }
     public required string Password { get; set; }
 
     public User.PasswordUpdate ToDomain()

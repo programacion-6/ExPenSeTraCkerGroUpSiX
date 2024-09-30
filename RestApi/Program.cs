@@ -23,6 +23,8 @@ builder.Services.AddScoped<IValidator<Income>, IncomeValidator>();
 builder.Services.AddScoped<IValidator<User>, UserValidator>();
 builder.Services.AddScoped<IValidator<User>, UserProfileValidator>();
 builder.Services.AddScoped<IValidator<User.PasswordUpdate>, UserPasswordResetValidator>();
+builder.Services.AddSingleton<PasswordRepositoryService>();
+
 
 builder.Services.AddControllers();
 
